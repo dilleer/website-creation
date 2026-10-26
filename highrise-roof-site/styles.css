@@ -97,12 +97,12 @@ html.no-webgl .stage { background: var(--midnight) url("images/hf-residential.we
 .hotspots { position: absolute; inset: 0; pointer-events: none; }
 .hotspot {
   position: absolute; left: 0; top: 0; pointer-events: auto; display: flex; align-items: center; gap: .5rem;
-  border: 0; background: none; padding: 0; cursor: pointer; color: var(--ivory); opacity: 0; transition: opacity .35s;
+  border: 0; background: none; padding: 0; min-width: 24px; min-height: 24px; cursor: pointer; color: var(--ivory); opacity: 0; transition: opacity .35s;
   will-change: transform;
 }
 .hotspots.is-on .hotspot { opacity: 1; }
 .hotspots.is-on .hotspot.is-hidden { opacity: .22; }
-.hotspot .ring { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--ivory); display: grid; place-items: center; background: rgba(16, 21, 29, .45); flex: none; transform: translate(-50%, -50%); margin-right: -11px; }
+.hotspot .ring { width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--ivory); display: grid; place-items: center; background: rgba(16, 21, 29, .45); flex: none; transform: translate(-50%, -50%); margin-right: -12px; }
 .hotspot .ring::after { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--blue); }
 .hotspot .lead { width: 28px; height: 1px; background: rgba(244, 243, 239, .55); transform: translateY(-11px); }
 .hotspot .tag { transform: translateY(-11px); font: 400 .72rem/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; background: rgba(16, 21, 29, .7); border: 1px solid rgba(244, 243, 239, .18); padding: .3rem .45rem; border-radius: 4px; }

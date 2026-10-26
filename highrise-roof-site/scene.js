@@ -389,7 +389,7 @@ function start() {
     composer && composer.setSize(w, h);
     camera.aspect = w / h;
     const wide = w / h > 1.05 && w > 860;
-    camera.setViewOffset(w, h, wide ? -w * 0.17 : 0, wide ? 0 : h * 0.15, w, h);
+    camera.setViewOffset(w, h, wide ? -w * 0.17 : 0, wide ? 0 : h * 0.2, w, h);
     camera.fov = wide ? 34 : 44;
     camera.updateProjectionMatrix();
     kick();
