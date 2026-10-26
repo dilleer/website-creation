@@ -1,15 +1,31 @@
 # Highrise Roofing NYC
 
-Static site for [Highrise Roofing](https://highriseroof.com/), a Brooklyn roofing contractor serving all five NYC boroughs.
+Static site for [Highrise Roofing](https://highriseroof.com/), a Brooklyn roofing contractor serving all five NYC boroughs. Concept: "Built above the ordinary."
 
 Open `index.html` through any static server (for example `python3 -m http.server`), or publish this folder with GitHub Pages. No build step.
 
-- `index.html` – page content (business info taken from highriseroof.com and its contact page)
-- `styles.css` – dark ink + lime accent system adapted from the DESIGN-3 reference
-- `site.js` – roof system data, layer list, borough picker, form validation, motion toggle
-- `scene.js` – three.js hero house (roof lifts on scroll) and the 3D roof-layer explorer
-- `vendor/three.module.min.js` – three.js r160 (MIT, see `vendor/three-LICENSE.txt`)
+## Scenes
 
-Accessibility: axe (WCAG 2.0/2.1/2.2 A and AA) passes with no violations at 1440 px, 640 px (200% zoom), 390 px and 320 px. Animations pause with the hero button and are off by default for `prefers-reduced-motion`; the 3D model rotates with buttons or arrow keys as well as by dragging.
+1. **Entrance** – a real-time 3D home at blue hour; scrolling moves the camera up toward the roof, the pointer adds parallax.
+2. **Explore** – drag to orbit, scroll or pinch to zoom, pick labelled roof components (ridge, valley, chimney flashing, skylight, gutters and more).
+3. **How it's built** – a cut roof section on a plinth separates into eight layers; pick one to isolate it and read what it does.
+4. **Finishes** – eight shingle, standing-seam metal and slate finishes; the roof changes with a ridge-to-eave wipe.
+5. **Residential / commercial** – tabbed service paths.
+6. **Estimate** – a three-step guided form with a progress indicator.
 
-The estimate form validates and then opens the visitor's email app addressed to info@highriseroof.com. Hook it up to a form service before launch.
+## Files
+
+- `index.html` – content (business info from highriseroof.com and its contact page)
+- `styles.css` – midnight / graphite / ivory with electric-blue accents; Manrope, DM Sans, JetBrains Mono
+- `site.js` – data (hotspots, finishes), tabs, guided form, motion toggle; talks to the 3D scene through `hr:*` events
+- `scene.js` – renderer, lighting, camera path, interaction, hotspots, finish wipe
+- `house.js`, `assembly.js`, `textures.js` – the house, the layered roof section and procedural materials
+- `vendor/` – three.js r160 and its post-processing modules (MIT, see `vendor/three-LICENSE.txt`)
+
+## Accessibility
+
+Every 3D interaction has a button equivalent in the panel next to it (component list, layer list, finish swatches, orbit and zoom buttons). Motion is off by default for `prefers-reduced-motion` and can be paused with the button at the bottom left. Without WebGL the page still reads top to bottom.
+
+## Before launch
+
+The estimate form validates and shows a summary. Set `data-endpoint` on `#estimate-form` to a form service (Formspree, Basin, etc.) so requests are delivered.

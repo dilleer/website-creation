@@ -1,184 +1,219 @@
-// Page behaviour that works without WebGL: motion toggle, roof system data + layer list,
-// borough picker, estimate form. scene.js listens to the events fired here.
+// Page behaviour that works with or without WebGL: scene controls, component and layer
+// lists, finish picker, residential/commercial tabs and the guided estimate form.
+// scene.js listens to the "hr:*" events fired here.
 (function () {
   "use strict";
 
-  // Typical assemblies, listed top (weather side) to bottom (deck).
-  var SYSTEMS = {
-    flat: {
-      name: "Flat roof, TPO membrane",
-      desc: "The workhorse of NYC rooftops. A heat-welded single-ply membrane over rigid insulation, built for low-slope roofs on row houses, apartment buildings and commercial blocks. We also install PVC, EPDM rubber, modified bitumen and liquid applied systems.",
-      layers: [
-        { name: "TPO membrane", detail: "White single-ply sheet with hot-air welded seams. Reflects summer heat.", color: "#e8ecea", h: 0.06, kind: "membrane" },
-        { name: "Cover board", detail: "Protects the insulation from foot traffic and hail.", color: "#b9b2a4", h: 0.08 },
-        { name: "Polyiso insulation", detail: "Rigid foam boards, often tapered so water runs to the drains.", color: "#d9c46d", h: 0.32 },
-        { name: "Vapor barrier", detail: "Keeps warm indoor moisture out of the roof build-up.", color: "#3f5866", h: 0.04 },
-        { name: "Roof deck", detail: "The structural base: plank, plywood, steel or concrete.", color: "#8c6f4f", h: 0.16, kind: "deck" }
-      ]
-    },
-    shingle: {
-      name: "Shingle roof",
-      desc: "Asphalt, architectural and designer shingles for pitched roofs, installed over a full underlayment so the roof stays dry even where a shingle lifts.",
-      layers: [
-        { name: "Architectural shingles", detail: "Laminated asphalt shingles with a dimensional, shadowed look.", color: "#3b3f43", h: 0.1, kind: "shingles" },
-        { name: "Synthetic underlayment", detail: "A second water barrier under every shingle course.", color: "#5f7d8c", h: 0.03 },
-        { name: "Ice and water shield", detail: "Self-adhering membrane at eaves, valleys and around penetrations.", color: "#25292b", h: 0.03 },
-        { name: "Plywood deck", detail: "Sound sheathing is checked and replaced where it has rotted.", color: "#b88d5b", h: 0.14, kind: "deck" }
-      ]
-    },
-    metal: {
-      name: "Standing seam metal",
-      desc: "Interlocking metal panels with raised seams and hidden fasteners. Light, long lasting and sheds snow and rain quickly.",
-      layers: [
-        { name: "Standing seam panels", detail: "Raised seams lock the panels together, with no exposed screws.", color: "#a2abae", h: 0.05, kind: "ribs" },
-        { name: "High-temp underlayment", detail: "Rated for the heat that builds up under metal.", color: "#41535c", h: 0.03 },
-        { name: "Plywood deck", detail: "Solid sheathing that the panel clips fasten into.", color: "#b88d5b", h: 0.14, kind: "deck" }
-      ]
-    },
-    slate: {
-      name: "Natural slate",
-      desc: "Split stone tiles laid in overlapping courses, the roof on many of the city's historic homes. We repair, restore and install slate.",
-      layers: [
-        { name: "Natural slate tiles", detail: "Each tile is nailed and overlaps the two courses below it.", color: "#4c5763", h: 0.1, kind: "tiles" },
-        { name: "Felt underlayment", detail: "Heavy felt that backs up the stone during installation and repairs.", color: "#2f2c29", h: 0.03 },
-        { name: "Plank or plywood deck", detail: "Slate is heavy, so the deck and framing must be sound.", color: "#9a7a52", h: 0.16, kind: "deck" }
-      ]
-    },
-    green: {
-      name: "Green roof system",
-      desc: "A planted roof that soaks up stormwater, cools the building and lasts longer because the membrane is shielded from sun and weather.",
-      layers: [
-        { name: "Sedum plants", detail: "Hardy, shallow-rooted plants suited to rooftops.", color: "#6f9a4a", h: 0.12, kind: "plants" },
-        { name: "Growing medium", detail: "Lightweight engineered soil, a few inches deep.", color: "#5b4431", h: 0.16 },
-        { name: "Filter fabric", detail: "Keeps soil from washing into the drainage layer.", color: "#cfc8b8", h: 0.025 },
-        { name: "Drainage mat", detail: "Holds some water for the plants and drains the rest.", color: "#2f3637", h: 0.08 },
-        { name: "Root barrier", detail: "Stops roots from reaching the waterproofing.", color: "#3f6e4f", h: 0.03 },
-        { name: "Waterproof membrane", detail: "The layer that keeps the building dry.", color: "#1f2324", h: 0.04 },
-        { name: "Insulation", detail: "Rigid boards for energy efficiency.", color: "#d9c46d", h: 0.2 },
-        { name: "Roof deck", detail: "Structural deck checked for the extra weight.", color: "#8c6f4f", h: 0.16, kind: "deck" }
-      ]
-    }
+  var HOTSPOTS = [
+    { id: "ridge", name: "Ridge vent and cap", detail: "The peak of the roof. A continuous vent under the cap shingles lets hot, damp attic air out, which keeps the deck dry and the shingles from cooking in summer." },
+    { id: "shingles", name: "Architectural shingles", detail: "The weather surface. Laminated shingles are nailed in overlapping courses so every nail is covered by the course above." },
+    { id: "valley", name: "Valley", detail: "Where two roof planes meet and water concentrates. We line valleys with ice and water shield before the shingles go down." },
+    { id: "skylight", name: "Skylight flashing", detail: "Step and saddle flashing kits around the frame. Most skylight leaks are flashing failures, not glass failures." },
+    { id: "chimney", name: "Chimney flashing", detail: "Step flashing under each shingle course, counter-flashing cut into the masonry above it. A common source of leaks on older Brooklyn homes." },
+    { id: "gutter", name: "Seamless gutter", detail: "Formed on site in one continuous length, so there are no joints to leak. Sized and pitched for how much roof drains into it." },
+    { id: "downspout", name: "Downspout", detail: "Carries water from the gutter to grade and away from the foundation. We size them so the gutter never backs up in a downpour." },
+    { id: "dripEdge", name: "Drip edge", detail: "Bent metal at the roof edge that sends water into the gutter instead of letting it wick back into the fascia board." }
+  ];
+
+  var FINISHES = {
+    "shingle-charcoal": { type: "shingles", label: "Architectural shingle, Charcoal", color: "#34373b", rough: 0.95, metal: 0, note: "The most popular choice in the city. Dimensional, affordable, and fast to install." },
+    "shingle-weathered": { type: "shingles", label: "Architectural shingle, Weathered wood", color: "#5c5249", rough: 0.95, metal: 0, note: "A warm brown-grey blend that suits brick and brownstone." },
+    "shingle-pewter": { type: "shingles", label: "Architectural shingle, Pewter gray", color: "#6c7075", rough: 0.95, metal: 0, note: "A lighter grey that reflects a little more summer heat." },
+    "metal-black": { type: "seam", label: "Standing seam metal, Matte black", color: "#1f2226", rough: 0.42, metal: 0.75, note: "Raised seams with hidden fasteners. Sheds snow and rain fast and lasts for decades." },
+    "metal-galvalume": { type: "seam", label: "Standing seam metal, Galvalume", color: "#b8bfc6", rough: 0.3, metal: 0.95, note: "Bare zinc-aluminum coated steel. A clean, industrial silver." },
+    "metal-bronze": { type: "seam", label: "Standing seam metal, Dark bronze", color: "#4b3b2d", rough: 0.4, metal: 0.8, note: "A deep brown metal that warms up modern facades." },
+    "slate-natural": { type: "slate", label: "Natural slate, Gray", color: "#5d6570", rough: 0.7, metal: 0, note: "Split stone, laid by hand. The roof on many of New York's historic homes." },
+    "slate-black": { type: "slate", label: "Natural slate, Vermont black", color: "#2d3036", rough: 0.6, metal: 0, note: "A near-black slate with a subtle sheen when wet." }
   };
 
   var reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
-  window.HR = { systems: SYSTEMS, system: "flat", layer: -1, explode: 0.55, paused: reduce.matches };
+  window.HR = {
+    hotspots: HOTSPOTS, finishes: FINISHES,
+    paused: reduce.matches, hotspot: null, layer: null, finish: "shingle-charcoal",
+    orbit: 0, zoom: 0
+  };
+  function emit(name, detail) { document.dispatchEvent(new CustomEvent(name, { detail: detail })); }
+  function $(s, r) { return (r || document).querySelector(s); }
+  function $$(s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); }
 
-  function emit(name) { document.dispatchEvent(new CustomEvent(name)); }
-
-  // Motion toggle (hero + explorer animations)
-  var motionBtn = document.getElementById("motion-toggle");
+  // ---- motion toggle ----
+  var motionBtn = $("#motion-toggle");
   function syncMotion() {
     motionBtn.setAttribute("aria-pressed", String(HR.paused));
-    motionBtn.querySelector(".motion-label").textContent = HR.paused ? "Play animation" : "Pause animation";
+    $(".motion-label", motionBtn).textContent = HR.paused ? "Play motion" : "Pause motion";
   }
   motionBtn.addEventListener("click", function () { HR.paused = !HR.paused; syncMotion(); emit("hr:motion"); });
   syncMotion();
 
-  // Roof explorer: system buttons + layer list
-  var list = document.getElementById("layer-list");
-  var nameEl = document.getElementById("system-name");
-  var descEl = document.getElementById("system-desc");
-  var frame = document.getElementById("explorer-frame");
-  var sysBtns = document.querySelectorAll("[data-system]");
-
-  function renderSystem(key) {
-    var s = SYSTEMS[key];
-    HR.system = key; HR.layer = -1;
-    nameEl.textContent = s.name;
-    descEl.textContent = s.desc;
-    frame.setAttribute("aria-label", "3D cutaway of a " + s.name.toLowerCase() + " with " + s.layers.length +
-      " layers: " + s.layers.map(function (l) { return l.name; }).join(", ") + ". Use the arrow keys to rotate.");
-    list.innerHTML = "";
-    s.layers.forEach(function (l, i) {
-      var li = document.createElement("li");
-      var btn = document.createElement("button");
-      btn.type = "button"; btn.className = "layer-btn"; btn.setAttribute("aria-pressed", "false");
-      btn.setAttribute("aria-controls", "layer-detail-" + i);
-      btn.innerHTML = '<span class="mono">' + String(i + 1).padStart(2, "0") + '</span><span class="swatch" aria-hidden="true"></span><span class="name"></span>';
-      btn.querySelector(".swatch").style.background = l.color;
-      btn.querySelector(".name").textContent = l.name;
-      var p = document.createElement("p");
-      p.className = "layer-detail"; p.id = "layer-detail-" + i; p.hidden = true; p.textContent = l.detail;
-      btn.addEventListener("click", function () { selectLayer(HR.layer === i ? -1 : i); });
-      btn.addEventListener("mouseenter", function () { if (HR.layer === -1) { HR.hover = i; emit("hr:layer"); } });
-      btn.addEventListener("mouseleave", function () { HR.hover = -1; emit("hr:layer"); });
-      li.appendChild(btn); li.appendChild(p); list.appendChild(li);
-    });
-    sysBtns.forEach(function (b) { b.setAttribute("aria-pressed", String(b.dataset.system === key)); });
-    emit("hr:system");
-  }
-  function selectLayer(i) {
-    HR.layer = i; HR.hover = -1;
-    list.querySelectorAll(".layer-btn").forEach(function (b, j) {
-      b.setAttribute("aria-pressed", String(j === i));
-      document.getElementById("layer-detail-" + j).hidden = j !== i;
-    });
-    emit("hr:layer");
-  }
-  sysBtns.forEach(function (b) { b.addEventListener("click", function () { renderSystem(b.dataset.system); }); });
-
-  var explode = document.getElementById("explode");
-  explode.addEventListener("input", function () {
-    HR.explode = explode.value / 100;
-    explode.setAttribute("aria-valuetext", explode.value + " percent apart");
-    emit("hr:explode");
+  // ---- scene 02: components ----
+  var compList = $("#component-list");
+  var compDetail = $("#component-detail");
+  HOTSPOTS.forEach(function (h, i) {
+    var li = document.createElement("li");
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "chip"; b.dataset.hotspot = h.id; b.setAttribute("aria-pressed", "false");
+    b.innerHTML = '<span class="chip-num mono">' + String(i + 1).padStart(2, "0") + "</span>";
+    b.appendChild(document.createTextNode(h.name));
+    b.addEventListener("click", function () { selectHotspot(HR.hotspot === h.id ? null : h.id); });
+    li.appendChild(b); compList.appendChild(li);
   });
-  document.querySelectorAll("[data-rotate]").forEach(function (b) {
-    b.addEventListener("click", function () { HR.rotate = Number(b.dataset.rotate) * 0.6; emit("hr:rotate"); });
-  });
-  renderSystem("flat");
+  function selectHotspot(id) {
+    HR.hotspot = id;
+    $$("[data-hotspot]").forEach(function (b) { b.setAttribute("aria-pressed", String(b.dataset.hotspot === id)); });
+    var h = HOTSPOTS.filter(function (x) { return x.id === id; })[0];
+    compDetail.innerHTML = "";
+    if (h) {
+      var t = document.createElement("p"); t.className = "detail-title"; t.textContent = h.name;
+      var d = document.createElement("p"); d.textContent = h.detail;
+      compDetail.appendChild(t); compDetail.appendChild(d);
+    } else {
+      compDetail.textContent = "Select a component to see what it does.";
+    }
+    emit("hr:hotspot");
+  }
+  window.HR.selectHotspot = selectHotspot;
+  selectHotspot(null);
 
-  // Borough picker
-  var boroughLine = document.getElementById("borough-line");
-  var bBtns = document.querySelectorAll("[data-borough]");
-  bBtns.forEach(function (b) {
+  $$("[data-orbit]").forEach(function (b) {
+    b.addEventListener("click", function () { emit("hr:orbit", { d: Number(b.dataset.orbit) }); });
+  });
+  $$("[data-zoom]").forEach(function (b) {
+    b.addEventListener("click", function () { emit("hr:zoom", { d: Number(b.dataset.zoom) }); });
+  });
+  $$("[data-view-reset]").forEach(function (b) {
+    b.addEventListener("click", function () { emit("hr:reset"); });
+  });
+
+  // ---- scene 03: layers ----
+  var layerDetail = $("#layer-detail");
+  $$("[data-layer]").forEach(function (b) {
     b.addEventListener("click", function () {
-      var name = b.dataset.borough;
-      bBtns.forEach(function (o) { o.setAttribute("aria-pressed", String(o === b)); });
-      boroughLine.textContent = name === "Brooklyn" ? "Yes, we cover Brooklyn. It's home." :
-        "Yes, we cover " + (name === "Bronx" ? "the Bronx" : name) + ".";
+      var id = HR.layer === b.dataset.layer ? null : b.dataset.layer;
+      HR.layer = id;
+      $$("[data-layer]").forEach(function (o) { o.setAttribute("aria-pressed", String(o.dataset.layer === id)); });
+      layerDetail.textContent = id ? b.dataset.detail : "Select a layer to isolate it.";
+      emit("hr:layer");
     });
   });
 
-  // Estimate form: validate, then hand off to the visitor's email app
-  var form = document.getElementById("estimate-form");
-  var status = document.getElementById("form-status");
+  // ---- scene 04: finishes ----
+  var finishName = $("#finish-name"), finishNote = $("#finish-note");
+  $$("[data-finish]").forEach(function (b) {
+    var f = FINISHES[b.dataset.finish];
+    b.querySelector(".swatch").style.background = f.color;
+    b.addEventListener("click", function () {
+      HR.finish = b.dataset.finish;
+      $$("[data-finish]").forEach(function (o) { o.setAttribute("aria-pressed", String(o === b)); });
+      finishName.textContent = f.label;
+      finishNote.textContent = f.note;
+      emit("hr:finish");
+    });
+  });
+
+  // ---- scene 05: residential / commercial tabs ----
+  var tabs = $$('[role="tab"]');
+  function showTab(tab, focus) {
+    tabs.forEach(function (t) {
+      var on = t === tab;
+      t.setAttribute("aria-selected", String(on));
+      t.tabIndex = on ? 0 : -1;
+      document.getElementById(t.getAttribute("aria-controls")).hidden = !on;
+    });
+    if (focus) tab.focus();
+  }
+  tabs.forEach(function (t, i) {
+    t.addEventListener("click", function () { showTab(t); });
+    t.addEventListener("keydown", function (e) {
+      var n = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
+      if (n) { e.preventDefault(); showTab(tabs[(i + n + tabs.length) % tabs.length], true); }
+      if (e.key === "Home") { e.preventDefault(); showTab(tabs[0], true); }
+      if (e.key === "End") { e.preventDefault(); showTab(tabs[tabs.length - 1], true); }
+    });
+  });
+
+  // ---- scene 06: guided estimate ----
+  var form = $("#estimate-form");
+  var steps = $$(".form-step", form);
+  var stepper = $$(".stepper li");
+  var stepLabel = $("#step-label");
+  var back = $("#step-back"), next = $("#step-next"), submit = $("#step-submit");
+  var status = $("#form-status");
+  var current = 0;
+
   var rules = {
+    service: function () { return form.elements.service.value ? "" : "Choose the service you need."; },
+    property: function () { return form.elements.property.value ? "" : "Choose the type of property."; },
+    address: function (v) { return v ? "" : "Enter the property address."; },
     name: function (v) { return v ? "" : "Enter your full name."; },
     email: function (v) { return !v ? "Enter your email address." : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? "" : "Enter an email address like name@example.com."; },
-    phone: function (v) { return !v ? "Enter your phone number." : v.replace(/\D/g, "").length >= 10 ? "" : "Enter a 10-digit phone number, like 347-731-6076."; },
-    address: function (v) { return v ? "" : "Enter the property address."; },
-    message: function (v) { return v ? "" : "Tell us a little about the roof or the problem."; }
+    phone: function (v) { return !v ? "Enter your phone number." : v.replace(/\D/g, "").length >= 10 ? "" : "Enter a 10-digit phone number, like 347-731-6076."; }
   };
-  function check(field) {
-    var msg = rules[field.name](field.value.trim());
-    var err = document.getElementById("e-" + field.name);
+  var stepFields = [["service", "property"], ["address"], ["name", "email", "phone"]];
+
+  function fieldEl(n) { var el = form.elements[n]; return el.length && !el.tagName ? el[0] : el; }
+  function check(n) {
+    var el = form.elements[n];
+    var msg = rules[n](el.value ? el.value.trim() : "");
+    var err = document.getElementById("e-" + n);
     err.textContent = msg;
-    if (msg) field.setAttribute("aria-invalid", "true"); else field.removeAttribute("aria-invalid");
+    var target = el.tagName ? el : document.getElementById("g-" + n);
+    if (msg) target.setAttribute("aria-invalid", "true"); else target.removeAttribute("aria-invalid");
     return !msg;
   }
-  Object.keys(rules).forEach(function (n) {
-    form.elements[n].addEventListener("blur", function (e) { if (e.target.value || e.target.hasAttribute("aria-invalid")) check(e.target); });
+  function go(i, noFocus) {
+    current = i;
+    steps.forEach(function (s, j) { s.hidden = j !== i; });
+    stepper.forEach(function (li, j) {
+      li.classList.toggle("done", j < i);
+      if (j === i) li.setAttribute("aria-current", "step"); else li.removeAttribute("aria-current");
+    });
+    stepLabel.textContent = "Step " + (i + 1) + " of " + steps.length;
+    back.hidden = i === 0;
+    next.hidden = i === steps.length - 1;
+    submit.hidden = i !== steps.length - 1;
+    var h = $("legend, h3", steps[i]);
+    if (h && !noFocus) { h.setAttribute("tabindex", "-1"); h.focus(); }
+  }
+  function validStep(i) {
+    var bad = null;
+    stepFields[i].forEach(function (n) { if (!check(n) && !bad) bad = n; });
+    if (bad) fieldEl(bad).focus();
+    return !bad;
+  }
+  next.addEventListener("click", function () { if (validStep(current)) go(current + 1); });
+  back.addEventListener("click", function () { go(current - 1); });
+  form.addEventListener("change", function (e) {
+    if (e.target.name === "service") {
+      $("#emergency-note").hidden = e.target.value !== "Emergency leak";
+      check("service");
+    }
+    if (e.target.name === "property") check("property");
+  });
+  ["address", "name", "email", "phone"].forEach(function (n) {
+    form.elements[n].addEventListener("blur", function (e) { if (e.target.value || e.target.hasAttribute("aria-invalid")) check(n); });
+  });
+  // preselect from service cards elsewhere on the page
+  $$("[data-prefill]").forEach(function (a) {
+    a.addEventListener("click", function () {
+      var radio = form.querySelector('input[name="service"][value="' + a.dataset.prefill + '"]');
+      if (radio) { radio.checked = true; $("#emergency-note").hidden = radio.value !== "Emergency leak"; go(0, true); }
+    });
   });
   form.addEventListener("submit", function (e) {
     e.preventDefault();
-    status.className = "form-status"; status.textContent = "";
-    var firstBad = null;
-    Object.keys(rules).forEach(function (n) { if (!check(form.elements[n]) && !firstBad) firstBad = form.elements[n]; });
-    if (firstBad) { firstBad.focus(); return; }
+    if (!validStep(current)) return;
     var f = form.elements;
-    var body = "Name: " + f.name.value + "\nEmail: " + f.email.value + "\nPhone: " + f.phone.value +
-      "\nProperty address: " + f.address.value + "\nService: " + (f.service.value || "Not sure yet") + "\n\n" + f.message.value;
-    if (window.HR_PREVIEW) {
-      status.className = "form-status ok";
-      status.textContent = "Preview only: on the live site this sends your request to info@highriseroof.com. For now, call 347-731-6076.";
-      return;
+    var summary = "Thanks, " + f.name.value.trim().split(" ")[0] + ". We have your request for " + f.service.value.toLowerCase() +
+      " at " + f.address.value.trim() + ". We'll reach you by " + (f.contact.value || "phone") + " within one business day.";
+    if (!window.HR_PREVIEW && form.dataset.endpoint) {
+      fetch(form.dataset.endpoint, { method: "POST", body: new FormData(form) }).catch(function () {});
     }
-    window.location.href = "mailto:info@highriseroof.com?subject=" + encodeURIComponent("Free estimate request: " + f.address.value) +
-      "&body=" + encodeURIComponent(body);
-    status.className = "form-status ok";
-    status.textContent = "Thanks, " + f.name.value.split(" ")[0] + ". Your email app should open with the request ready to send. If it doesn't, call 347-731-6076.";
+    form.hidden = true;
+    status.hidden = false;
+    $("#status-text").textContent = summary + (window.HR_PREVIEW ? " (Preview only: nothing was sent.)" : "");
+    status.focus();
   });
+  go(0, true);
 
-  document.getElementById("year").textContent = new Date().getFullYear();
+  var y = $("#year"); if (y) y.textContent = new Date().getFullYear();
 })();
