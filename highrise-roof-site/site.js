@@ -70,8 +70,24 @@
       compDetail.textContent = "Select a component to see what it does.";
     }
     emit("hr:hotspot");
+    // on phones the panel is a short scrolling sheet: bring the answer into view
+    var sheet = compDetail.closest(".panel"); if (sheet && id) sheet.scrollTop = 0;
   }
   window.HR.selectHotspot = selectHotspot;
+
+  // The preview frame blocks tel: links, so say what would happen instead of failing silently.
+  if (window.HR_PREVIEW) {
+    var toast;
+    document.addEventListener("click", function (e) {
+      var a = e.target.closest && e.target.closest('a[href^="tel:"]');
+      if (!a) return;
+      e.preventDefault();
+      if (!toast) { toast = document.createElement("p"); toast.className = "preview-toast"; toast.setAttribute("role", "status"); document.body.appendChild(toast); }
+      toast.textContent = "Calls can't be placed from this preview. On the live site this button dials 347-731-6076.";
+      toast.hidden = false;
+      clearTimeout(toast.t); toast.t = setTimeout(function () { toast.hidden = true; }, 5000);
+    });
+  }
   selectHotspot(null);
 
   $$("[data-orbit]").forEach(function (b) {
@@ -92,6 +108,7 @@
       HR.layer = id;
       $$("[data-layer]").forEach(function (o) { o.setAttribute("aria-pressed", String(o.dataset.layer === id)); });
       layerDetail.textContent = id ? b.dataset.detail : "Select a layer to isolate it.";
+      var sheet = layerDetail.closest(".panel"); if (sheet) sheet.scrollTop = 0;
       emit("hr:layer");
     });
   });
