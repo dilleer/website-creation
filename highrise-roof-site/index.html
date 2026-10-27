@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Highrise Roofing NYC</title>
+<meta name="description" content="Highrise Roofing: built above the ordinary. GAF Gold Elite Commercial Contractor serving Brooklyn and all five NYC boroughs. Shingle, flat, slate, metal and green roofs, gutters, siding and stucco. 24/7 emergency: 347-731-6076.">
+<meta name="theme-color" content="#f6f6f4">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400&family=IBM+Plex+Mono:wght@300;400;500&display=swap">
+<link rel="stylesheet" href="styles.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"RoofingContractor","name":"Highrise Roofing","url":"https://highriseroof.com/","telephone":"+1-347-731-6076","email":"info@highriseroof.com","address":{"@type":"PostalAddress","addressLocality":"Brooklyn","addressRegion":"NY","addressCountry":"US"},"geo":{"@type":"GeoCoordinates","latitude":40.678178,"longitude":-73.944158},"areaServed":["Brooklyn","Manhattan","Queens","Bronx","Staten Island"],"openingHoursSpecification":[{"@type":"OpeningHoursSpecification","dayOfWeek":["Monday","Tuesday","Wednesday","Thursday","Friday"],"opens":"08:00","closes":"17:00"},{"@type":"OpeningHoursSpecification","dayOfWeek":"Saturday","opens":"09:00","closes":"15:00"}],"slogan":"Built above the ordinary."}</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<header class="site-header">
+  <div class="wrap header-row">
+    <a class="brand" href="#top" aria-label="Highrise Roofing, back to top">
+      <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><path d="M3 18 16 6l13 12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/><path d="M16 6v20" stroke="var(--blue)" stroke-width="1.4"/><path d="M8 14.5V27h16V14.5" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
+      <span class="brand-name">Highrise</span>
+    </a>
+    <nav class="site-nav" aria-label="Main">
+      <ul>
+        <li><a href="#explore">Explore</a></li>
+        <li><a href="#layers">How it's built</a></li>
+        <li><a href="#finish">Finishes</a></li>
+        <li><a href="#services">Services</a></li>
+        <li><a href="#faq">FAQ</a></li>
+      </ul>
+    </nav>
+    <div class="header-actions">
+      <a class="header-phone label" href="tel:+13477316076">347-731-6076</a>
+      <a class="btn btn-primary" href="#estimate">Free estimate</a>
+    </div>
+  </div>
+</header>
+
+<button class="motion-toggle label" type="button" id="motion-toggle" aria-pressed="false"><span class="motion-icon" aria-hidden="true"></span><span class="motion-label">Pause motion</span></button>
+<div class="stage" aria-hidden="true">
+  <canvas id="stage"></canvas>
+  <div class="stage-shade"></div>
+  <div class="hotspots" id="hotspots"></div>
+</div>
+
+<main id="main" tabindex="-1">
+
+  <!-- Scene 01 -->
+  <section class="scene scene-entrance" id="top" aria-labelledby="hero-title">
+    <div class="wrap scene-inner">
+      <div class="panel panel-hero">
+        <p class="label eyebrow"><span class="tick" aria-hidden="true"></span>Highrise Roofing · Brooklyn, NYC</p>
+        <h1 id="hero-title" class="display">Built above the ordinary.</h1>
+        <p class="lede">Roofs designed, installed and repaired by a GAF Gold Elite Commercial Contractor. Shingle, flat, slate, metal and green roofs across all five boroughs, with a crew on call 24/7 for leaks.</p>
+        <div class="cta-row">
+          <a class="btn btn-primary btn-lg" href="#estimate">Get a free estimate</a>
+          <a class="btn btn-ghost btn-lg" href="tel:+13477316076">Call 347-731-6076</a>
+        </div>
+        <ul class="meta-row label">
+          <li>10+ years</li><li>Licensed and insured</li><li>Warranty on all work</li>
+        </ul>
+      </div>
+      <p class="scroll-cue label" aria-hidden="true"><span></span>Scroll to fly up to the roof</p>
+    </div>
+  </section>
+
+  <!-- Scene 02 -->
+  <section class="scene scene-explore" id="explore" aria-labelledby="explore-title">
+    <div class="wrap scene-inner">
+      <div class="panel">
+        <p class="label eyebrow">02 / Explore the roof</p>
+        <h2 id="explore-title" class="h2">Every part of a roof has a job.</h2>
+        <p class="body-muted">Drag the house to orbit it, pinch or use the buttons to zoom, and pick a component to see what it does.</p>
+        <div class="view-controls" role="group" aria-label="Camera">
+          <button type="button" class="icon-btn" data-orbit="-1" aria-label="Orbit left">←</button>
+          <button type="button" class="icon-btn" data-orbit="1" aria-label="Orbit right">→</button>
+          <button type="button" class="icon-btn" data-zoom="1" aria-label="Zoom in">+</button>
+          <button type="button" class="icon-btn" data-zoom="-1" aria-label="Zoom out">−</button>
+          <button type="button" class="icon-btn icon-btn-text label" data-view-reset>Reset</button>
+        </div>
+        <ul class="chip-list" id="component-list" aria-label="Roof components"></ul>
+        <div class="detail" id="component-detail" aria-live="polite"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Scene 03 -->
+  <section class="scene scene-layers" id="layers" aria-labelledby="layers-title">
+    <div class="wrap scene-inner">
+      <div class="panel">
+        <p class="label eyebrow">03 / Engineering and craftsmanship</p>
+        <h2 id="layers-title" class="h2">Eight layers between your home and the weather.</h2>
+        <p class="body-muted">Keep scrolling and the roof comes apart in the order we build it. Select a layer to isolate it.</p>
+        <ol class="layer-list">
+          <li><button type="button" class="layer-btn" data-layer="cap" aria-pressed="false" data-detail="A vented ridge lets hot, damp attic air escape along the peak. Cap shingles are bent over it and nailed through, so the vent stays dry."><span class="label">08</span>Ridge vent and cap</button></li>
+          <li><button type="button" class="layer-btn" data-layer="shingles" aria-pressed="false" data-detail="Laminated asphalt shingles, nailed in overlapping courses so every fastener is covered by the course above. This is the layer that takes the weather."><span class="label">07</span>Architectural shingles</button></li>
+          <li><button type="button" class="layer-btn" data-layer="starter" aria-pressed="false" data-detail="A row of adhesive-backed shingles at the eave. It seals the first course down so wind can't lift it from below."><span class="label">06</span>Starter strip</button></li>
+          <li><button type="button" class="layer-btn" data-layer="drip" aria-pressed="false" data-detail="Bent metal along the eaves and rakes, with the gutter hung below. It throws water into the gutter instead of letting it wick back into the fascia and deck."><span class="label">05</span>Drip edge and gutter</button></li>
+          <li><button type="button" class="layer-btn" data-layer="underlayment" aria-pressed="false" data-detail="A tear-resistant, water-shedding sheet over the entire deck. It is the second line of defence if a shingle is ever damaged."><span class="label">04</span>Synthetic underlayment</button></li>
+          <li><button type="button" class="layer-btn" data-layer="ice" aria-pressed="false" data-detail="Self-adhering membrane at the eaves, valleys and around penetrations, where ice dams and wind-driven rain hit hardest. It seals around every nail."><span class="label">03</span>Ice and water shield</button></li>
+          <li><button type="button" class="layer-btn" data-layer="deck" aria-pressed="false" data-detail="Plywood or OSB sheathing nailed to the rafters. We check every sheet and replace soft or rotted sections before anything goes on top."><span class="label">02</span>Roof deck</button></li>
+          <li><button type="button" class="layer-btn" data-layer="rafters" aria-pressed="false" data-detail="The structure carries the load to the walls. Soffit intake vents at the eave feed cool air up under the deck and out through the ridge."><span class="label">01</span>Rafters and ventilation</button></li>
+        </ol>
+        <p class="detail" id="layer-detail" aria-live="polite">Select a layer to isolate it.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Scene 04 -->
+  <section class="scene scene-finish" id="finish" aria-labelledby="finish-title">
+    <div class="wrap scene-inner">
+      <div class="panel">
+        <p class="label eyebrow">04 / Choose your finish</p>
+        <h2 id="finish-title" class="h2">See your house in a new roof.</h2>
+        <div class="finish-groups">
+          <div class="finish-group" role="group" aria-labelledby="fg-shingle">
+            <p class="label" id="fg-shingle">Architectural shingle</p>
+            <div class="swatches">
+              <button type="button" class="swatch-btn" data-finish="shingle-charcoal" aria-pressed="true"><span class="swatch" aria-hidden="true"></span>Charcoal</button>
+              <button type="button" class="swatch-btn" data-finish="shingle-weathered" aria-pressed="false"><span class="swatch" aria-hidden="true"></span>Weathered wood</button>
+              <button type="button" class="swatch-btn" data-finish="shingle-pewter" aria-pressed="false"><span class="swatch" aria-hidden="true"></span>Pewter gray</button>
+            </div>
+          </div>
+          <div class="finish-group" role="group" aria-labelledby="fg-metal">
+            <p class="label" id="fg-metal">Standing seam metal</p>
+            <div class="swatches">
+              <button type="button" class="swatch-btn" data-finish="metal-black" aria-pressed="false"><span class="swatch" aria-hidden="true"></span>Matte black</button>
+              <button type="button" class="swatch-btn" data-finish="metal-galvalume" aria-pressed="false"><span class="swatch" aria-hidden="true"></span>Galvalume</button>
+              <button type="button" class="swatch-btn" data-finish="metal-bronze" aria-pressed="false"><span class="swatch" aria-hidden="true"></span>Dark bronze</button>
+            </div>
+          </div>
+          <div class="finish-group" role="group" aria-labelledby="fg-slate">
+            <p class="label" id="fg-slate">Natural slate</p>
+            <div class="swatches">
+              <button type="button" class="swatch-btn" data-finish="slate-natural" aria-pressed="false"><span class="swatch" aria-hidden="true"></span>Gray</button>
+              <button type="button" class="swatch-btn" data-finish="slate-black" aria-pressed="false"><span class="swatch" aria-hidden="true"></span>Vermont black</button>
+            </div>
+          </div>
+        </div>
+        <div class="detail" aria-live="polite">
+          <p class="detail-title" id="finish-name">Architectural shingle, Charcoal</p>
+          <p id="finish-note">The most popular choice in the city. Dimensional, affordable, and fast to install.</p>
+        </div>
+        <p class="fine">Colors on screen are approximate. We bring physical samples to your estimate.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Scene 05 -->
+  <section class="section" id="services" aria-labelledby="services-title">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="label eyebrow">05 / Residential and commercial</p>
+        <h2 id="services-title" class="h2">Two kinds of buildings. One standard.</h2>
+      </div>
+      <div class="tablist" role="tablist" aria-label="Property type">
+        <button type="button" role="tab" id="tab-res" aria-controls="panel-res" aria-selected="true">Residential</button>
+        <button type="button" role="tab" id="tab-com" aria-controls="panel-com" aria-selected="false" tabindex="-1">Commercial</button>
+      </div>
+
+      <div class="path" id="panel-res" role="tabpanel" aria-labelledby="tab-res" tabindex="0">
+        <figure class="path-img"><img src="images/hf-residential.webp" alt="Two-story home at dusk with a charcoal architectural shingle roof, stone and board-and-batten siding, and warmly lit windows" width="1376" height="694" loading="lazy"></figure>
+        <div class="path-body">
+          <h3 class="h3">Homes, brownstones and multi-family buildings</h3>
+          <p class="body-muted">From a single leak to a full tear-off, with the same crew from inspection to cleanup.</p>
+          <div class="path-cols">
+            <ul class="ticks">
+              <li>Asphalt, architectural and designer shingles</li>
+              <li>Natural slate and standing seam metal</li>
+              <li>Complete roof replacements</li>
+              <li>Seamless gutters, guards and downspouts</li>
+            </ul>
+            <ul class="ticks">
+              <li>Vinyl, fiber cement and wood siding</li>
+              <li>Stucco and EIFS repair and restoration</li>
+              <li>Storm damage assessment</li>
+              <li>Insurance claim assistance</li>
+            </ul>
+          </div>
+          <a class="btn btn-ghost" href="#estimate" data-prefill="Roof replacement">Plan a residential project</a>
+        </div>
+      </div>
+
+      <div class="path" id="panel-com" role="tabpanel" aria-labelledby="tab-com" tabindex="0" hidden>
+        <figure class="path-img"><img src="images/hf-commercial.webp" alt="Aerial view of a large commercial building with a white membrane roof, walkway pads and rooftop mechanical units, with the Manhattan skyline behind" width="1376" height="694" loading="lazy"></figure>
+        <div class="path-body">
+          <h3 class="h3">Commercial roofs that keep the business open</h3>
+          <p class="body-muted">GAF Gold Elite Commercial certified, with work scheduled around your tenants and operations.</p>
+          <div class="path-cols">
+            <ul class="ticks">
+              <li>TPO and PVC membranes</li>
+              <li>EPDM rubber roofing</li>
+              <li>Modified bitumen</li>
+              <li>Liquid applied systems</li>
+            </ul>
+            <ul class="ticks">
+              <li>Green roof systems</li>
+              <li>Preventive maintenance programs</li>
+              <li>24/7 emergency leak response</li>
+              <li>Budget-friendly repair options</li>
+            </ul>
+          </div>
+          <a class="btn btn-ghost" href="#estimate" data-prefill="Flat or commercial roof">Plan a commercial project</a>
+        </div>
+      </div>
+
+      <ul class="proof">
+        <li><span class="proof-num">GAF</span><span class="label">Gold Elite Commercial Contractor</span></li>
+        <li><span class="proof-num">24/7</span><span class="label">Emergency leak response</span></li>
+        <li><span class="proof-num">5</span><span class="label">Boroughs: Brooklyn, Manhattan, Queens, Bronx, Staten Island</span></li>
+        <li><span class="proof-num">$0</span><span class="label">Detailed estimates · financing available</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="section section-alt" id="faq" aria-labelledby="faq-title">
+    <div class="wrap faq-grid">
+      <div class="section-head">
+        <p class="label eyebrow">Questions</p>
+        <h2 id="faq-title" class="h2">Before you call.</h2>
+      </div>
+      <div class="faq-list">
+        <details><summary>My roof is leaking right now. What do I do?</summary><p>Call 347-731-6076. Our emergency line is open 24/7, including nights and weekends.</p></details>
+        <details><summary>Is the estimate really free?</summary><p>Yes. We inspect the roof and give you a detailed written estimate at no charge.</p></details>
+        <details><summary>Which areas do you serve?</summary><p>Brooklyn, Manhattan, Queens, the Bronx and Staten Island.</p></details>
+        <details><summary>Can you help with an insurance claim after storm damage?</summary><p>Yes. We assess storm damage and help you with the insurance claim.</p></details>
+        <details><summary>Do you offer financing?</summary><p>Financing options are available. Ask about them when you request your estimate.</p></details>
+        <details><summary>Is your work under warranty?</summary><p>All of our work comes with a warranty. The terms depend on the system installed, and we spell them out in your estimate.</p></details>
+        <details><summary>What are your hours?</summary><p>Monday to Friday 8 AM to 5 PM, Saturday 9 AM to 3 PM. Emergency service runs 24/7.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <!-- Scene 06 -->
+  <section class="section" id="estimate" aria-labelledby="estimate-title">
+    <div class="wrap estimate-grid">
+      <div class="section-head">
+        <p class="label eyebrow">06 / Free estimate</p>
+        <h2 id="estimate-title" class="h2">Tell us about the roof. We'll take it from there.</h2>
+        <dl class="contact-facts">
+          <div><dt class="label">Phone, 24/7 emergency</dt><dd><a href="tel:+13477316076">347-731-6076</a></dd></div>
+          <div><dt class="label">Email</dt><dd><a href="mailto:info@highriseroof.com">info@highriseroof.com</a></dd></div>
+          <div><dt class="label">Office hours</dt><dd>Mon to Fri, 8 AM to 5 PM<br>Saturday, 9 AM to 3 PM</dd></div>
+          <div><dt class="label">Based in</dt><dd>Brooklyn, New York</dd></div>
+        </dl>
+      </div>
+
+      <div class="form-card">
+        <ol class="stepper" aria-label="Estimate steps">
+          <li aria-current="step"><span class="label">01</span>Service</li>
+          <li><span class="label">02</span>Project</li>
+          <li><span class="label">03</span>Contact</li>
+        </ol>
+        <p class="label step-label" id="step-label" aria-live="polite">Step 1 of 3</p>
+
+        <form id="estimate-form" novalidate>
+          <div class="form-step">
+            <fieldset id="g-service" aria-describedby="e-service">
+              <legend class="h3">What do you need?</legend>
+              <div class="choice-grid">
+                <label class="choice"><input type="radio" name="service" value="Roof replacement"><span>Roof replacement</span></label>
+                <label class="choice"><input type="radio" name="service" value="Roof repair"><span>Roof repair</span></label>
+                <label class="choice"><input type="radio" name="service" value="Flat or commercial roof"><span>Flat or commercial roof</span></label>
+                <label class="choice"><input type="radio" name="service" value="Inspection"><span>Inspection</span></label>
+                <label class="choice"><input type="radio" name="service" value="Gutters"><span>Gutters</span></label>
+                <label class="choice"><input type="radio" name="service" value="Siding or stucco"><span>Siding or stucco</span></label>
+                <label class="choice choice-wide"><input type="radio" name="service" value="Emergency leak"><span>Emergency leak</span></label>
+              </div>
+              <p class="error" id="e-service"></p>
+              <p class="note" id="emergency-note" hidden>For an active leak, calling is fastest: <a href="tel:+13477316076">347-731-6076</a>, 24/7.</p>
+            </fieldset>
+            <fieldset id="g-property" aria-describedby="e-property">
+              <legend class="label">Property type</legend>
+              <div class="choice-row">
+                <label class="choice"><input type="radio" name="property" value="House"><span>House</span></label>
+                <label class="choice"><input type="radio" name="property" value="Multi-family"><span>Multi-family</span></label>
+                <label class="choice"><input type="radio" name="property" value="Commercial"><span>Commercial</span></label>
+              </div>
+              <p class="error" id="e-property"></p>
+            </fieldset>
+          </div>
+
+          <div class="form-step" hidden>
+            <h3 class="h3">About the project</h3>
+            <div class="field">
+              <label for="f-address">Property address</label>
+              <input id="f-address" name="address" type="text" autocomplete="street-address" required aria-describedby="e-address">
+              <p class="error" id="e-address"></p>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label for="f-roof">Current roof (optional)</label>
+                <select id="f-roof" name="roof">
+                  <option value="">Not sure</option>
+                  <option>Asphalt shingle</option><option>Flat (TPO, EPDM, modified bitumen)</option>
+                  <option>Slate</option><option>Metal</option><option>Green roof</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="f-when">Timing (optional)</label>
+                <select id="f-when" name="timing">
+                  <option value="">No rush</option><option>As soon as possible</option>
+                  <option>Within 1 to 3 months</option><option>Planning for later this year</option>
+                </select>
+              </div>
+            </div>
+            <div class="field">
+              <label for="f-message">Anything we should know? (optional)</label>
+              <textarea id="f-message" name="message" rows="4"></textarea>
+            </div>
+            <label class="check"><input type="checkbox" name="insurance" value="yes"> This is an insurance claim</label>
+          </div>
+
+          <div class="form-step" hidden>
+            <h3 class="h3">How do we reach you?</h3>
+            <div class="field">
+              <label for="f-name">Full name</label>
+              <input id="f-name" name="name" type="text" autocomplete="name" required aria-describedby="e-name">
+              <p class="error" id="e-name"></p>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label for="f-email">Email</label>
+                <input id="f-email" name="email" type="email" autocomplete="email" required aria-describedby="e-email">
+                <p class="error" id="e-email"></p>
+              </div>
+              <div class="field">
+                <label for="f-phone">Phone</label>
+                <input id="f-phone" name="phone" type="tel" autocomplete="tel" required aria-describedby="e-phone">
+                <p class="error" id="e-phone"></p>
+              </div>
+            </div>
+            <fieldset>
+              <legend class="label">Best way to reach you</legend>
+              <div class="choice-row">
+                <label class="choice"><input type="radio" name="contact" value="phone" checked><span>Phone</span></label>
+                <label class="choice"><input type="radio" name="contact" value="text"><span>Text</span></label>
+                <label class="choice"><input type="radio" name="contact" value="email"><span>Email</span></label>
+              </div>
+            </fieldset>
+          </div>
+
+          <div class="form-nav">
+            <button type="button" class="btn btn-ghost" id="step-back" hidden>Back</button>
+            <button type="button" class="btn btn-primary" id="step-next">Continue</button>
+            <button type="submit" class="btn btn-primary" id="step-submit" hidden>Request my free estimate</button>
+          </div>
+        </form>
+        <div class="form-done" id="form-status" tabindex="-1" hidden>
+          <p class="h3">Request received.</p>
+          <p id="status-text"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-grid">
+    <div>
+      <p class="footer-brand">Highrise Roofing</p>
+      <p class="body-muted">Built above the ordinary. Licensed and fully insured. GAF Gold Elite Commercial Contractor.</p>
+    </div>
+    <nav aria-label="Footer">
+      <ul class="footer-links">
+        <li><a href="#explore">Explore the roof</a></li>
+        <li><a href="#layers">How it's built</a></li>
+        <li><a href="#finish">Finishes</a></li>
+        <li><a href="#services">Services</a></li>
+        <li><a href="#estimate">Free estimate</a></li>
+      </ul>
+    </nav>
+    <div class="footer-contact">
+      <a href="tel:+13477316076">347-731-6076</a><br>
+      <a href="mailto:info@highriseroof.com">info@highriseroof.com</a><br>
+      <span>Brooklyn, NY</span>
+    </div>
+  </div>
+  <div class="wrap footer-base">
+    <p class="label">© <span id="year">2026</span> Highrise Roofing NYC</p>
+    <button class="link-btn label" type="button" id="cookie-settings">Cookie settings</button>
+  </div>
+</footer>
+
+<div class="mobile-bar" role="region" aria-label="Quick contact">
+  <a class="btn btn-primary" href="tel:+13477316076">Call 24/7</a>
+  <a class="btn btn-ghost" href="#estimate">Free estimate</a>
+</div>
+
+<section class="cookie-banner" id="cookie-banner" aria-labelledby="cookie-title" hidden>
+  <div class="cookie-text">
+    <h2 class="cookie-title" id="cookie-title">Cookies</h2>
+    <p id="cookie-desc">We use essential cookies to run this site. With your OK we'd also use analytics cookies to see which pages help homeowners most. You can change this any time from the footer.</p>
+  </div>
+  <div class="cookie-actions">
+    <button class="btn btn-ghost" type="button" data-consent="declined">Decline</button>
+    <button class="btn btn-primary" type="button" data-consent="accepted">Accept all</button>
+  </div>
+</section>
+
+<script type="importmap">{"imports":{"three":"./vendor/three.module.min.js"}}</script>
+<script src="site.js"></script>
+<script type="module" src="scene.js"></script>
+</body>
+</html>
