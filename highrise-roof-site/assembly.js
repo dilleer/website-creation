@@ -56,7 +56,7 @@ export function buildAssembly(maps) {
   const ul = mesh(new THREE.BoxGeometry(W, 0.008, D - 1.0), mk({ color: 0x8e9aa6, roughness: 0.7 }));
   ul.position.set(0, 0.004, -0.5); u.add(ul);
   for (let i = 0; i < 3; i++) {
-    const line = mesh(new THREE.BoxGeometry(W, 0.01, 0.02), mk({ color: 0x2779d5, roughness: 0.6 }));
+    const line = mesh(new THREE.BoxGeometry(W, 0.01, 0.02), mk({ color: 0x2c2c26, roughness: 0.6 }));
     line.position.set(0, 0.009, -D / 2 + 0.4 + i * 0.7); u.add(line);
   }
 
@@ -114,7 +114,7 @@ export function buildAssembly(maps) {
         if (!o.material) return;
         o.material.opacity = on ? 1 : 0.12;
         o.material.depthWrite = on;
-        o.material.emissive?.setHex(id && key === id ? 0x2779d5 : 0x000000);
+        o.material.emissive?.setHex(id && key === id ? 0xfff347 : 0x000000);
         if (o.material.emissive) o.material.emissiveIntensity = id && key === id ? 0.18 : 0;
       });
     });
@@ -122,10 +122,10 @@ export function buildAssembly(maps) {
   explode(0);
 
   // a dark plinth so it reads as a studio display piece
-  const plinth = new THREE.Mesh(new THREE.CylinderGeometry(2.7, 2.85, 0.3, 64), new THREE.MeshStandardMaterial({ color: 0x1a1f27, roughness: 0.6, metalness: 0.3 }));
+  const plinth = new THREE.Mesh(new THREE.CylinderGeometry(2.7, 2.85, 0.3, 64), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.7, metalness: 0 }));
   plinth.position.y = -2.1; plinth.receiveShadow = true;
   root.add(plinth);
-  const ring = new THREE.Mesh(new THREE.TorusGeometry(2.78, 0.012, 8, 128), new THREE.MeshBasicMaterial({ color: 0x2779d5 }));
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(2.78, 0.012, 8, 128), new THREE.MeshBasicMaterial({ color: 0x2c2c26 }));
   ring.rotation.x = Math.PI / 2; ring.position.y = -1.94;
   root.add(ring);
 

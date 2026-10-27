@@ -6,7 +6,7 @@ Open `index.html` through any static server (for example `python3 -m http.server
 
 ## Scenes
 
-1. **Entrance** – a real-time 3D home at blue hour; scrolling moves the camera up toward the roof, the pointer adds parallax.
+1. **Entrance** – a real-time 3D home in soft daylight that fades into the page; scrolling moves the camera up toward the roof, the pointer adds parallax.
 2. **Explore** – drag to orbit, scroll or pinch to zoom, pick labelled roof components (ridge, valley, chimney flashing, skylight, gutters and more).
 3. **How it's built** – a cut roof section on a plinth separates into eight layers; pick one to isolate it and read what it does.
 4. **Finishes** – eight shingle, standing-seam metal and slate finishes; the roof changes with a ridge-to-eave wipe.
@@ -16,11 +16,11 @@ Open `index.html` through any static server (for example `python3 -m http.server
 ## Files
 
 - `index.html` – content (business info from highriseroof.com and its contact page)
-- `styles.css` – midnight / graphite / ivory with electric-blue accents; Manrope, DM Sans, JetBrains Mono
+- `styles.css` – warm cream canvas, white cards, warm-black ink, a yellow accent used only as small strokes; Fraunces 300 display serif, IBM Plex Mono for all UI text
 - `site.js` – data (hotspots, finishes), tabs, guided form, motion toggle; talks to the 3D scene through `hr:*` events
 - `scene.js` – renderer, lighting, camera path, interaction, hotspots, finish wipe
 - `house.js`, `assembly.js`, `textures.js` – the house, the layered roof section and procedural materials
-- `vendor/` – three.js r160 and its post-processing modules (MIT, see `vendor/three-LICENSE.txt`)
+- `vendor/` – three.js r160 (MIT, see `vendor/three-LICENSE.txt`)
 
 ## Accessibility
 

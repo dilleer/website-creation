@@ -148,7 +148,7 @@ export function buildHouse(maps) {
   // ---------- Warm interior light spill ----------
   const lights = [];
   [[3.1, 2.2, 6.4, 10], [3.1, 4.8, 6.4, 7], [-1.6, 2, 2.8, 6]].forEach(([x, y, z, i]) => {
-    const l = new THREE.PointLight(0xffb36b, i, 9, 2);
+    const l = new THREE.PointLight(0xffc48a, i * 0.25, 9, 2);
     l.position.set(x, y, z); house.add(l); lights.push(l);
   });
 
@@ -264,7 +264,7 @@ function interiorGlass(seed) {
   for (let i = 0; i < 3; i++) { const w = 20 + rnd() * 60, h = 30 + rnd() * 80; g.fillRect(rnd() * (256 - w), 256 - h, w, h); }
   g.fillStyle = "rgba(30,18,10,.55)"; g.fillRect(0, 0, 18 + rnd() * 20, 256); g.fillRect(256 - 14 - rnd() * 24, 0, 40, 256);
   const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace;
-  const m = new THREE.MeshStandardMaterial({ color: 0x0c0a09, roughness: 0.05, metalness: 0.35, emissive: 0xffffff, emissiveMap: tex, emissiveIntensity: 0.85, envMapIntensity: 1.2 });
+  const m = new THREE.MeshStandardMaterial({ color: 0x0c0a09, roughness: 0.05, metalness: 0.35, emissive: 0xffffff, emissiveMap: tex, emissiveIntensity: 0.32, envMapIntensity: 1.2 });
   glassCache.set(seed, m);
   return m;
 }

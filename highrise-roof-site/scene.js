@@ -1,10 +1,6 @@
 // One WebGL stage for scenes 01–04. Scroll drives the camera along a path of poses; inside each
 // scene the visitor can orbit, zoom, pick hotspots, explode the roof and swap finishes.
 import * as THREE from "three";
-import { EffectComposer } from "./vendor/jsm/postprocessing/EffectComposer.js";
-import { RenderPass } from "./vendor/jsm/postprocessing/RenderPass.js";
-import { UnrealBloomPass } from "./vendor/jsm/postprocessing/UnrealBloomPass.js";
-import { OutputPass } from "./vendor/jsm/postprocessing/OutputPass.js";
 import * as T from "./textures.js";
 import { buildHouse } from "./house.js";
 import { buildAssembly } from "./assembly.js";
@@ -28,21 +24,21 @@ function start() {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, small ? 1.5 : 1.75));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.12;
+  renderer.toneMappingExposure = 0.95;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.localClippingEnabled = true;
 
   const scene = new THREE.Scene();
-  scene.fog = new THREE.FogExp2(0x0e1522, 0.0105);
+  scene.fog = new THREE.FogExp2(0xf1f0ea, 0.0085);   // fades distant ground into the cream page
   const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 900);
 
-  // ---------- blue-hour sky ----------
+  // ---------- soft daylight sky that melts into the cream page ----------
   const sky = new THREE.Mesh(new THREE.SphereGeometry(450, 48, 24), new THREE.ShaderMaterial({
-    side: THREE.BackSide, depthWrite: false, fog: false,
+    side: THREE.BackSide, depthWrite: false, fog: false, toneMapped: false,
     uniforms: {
-      top: { value: new THREE.Color(0x04070f) }, mid: { value: new THREE.Color(0x12203a) },
-      horizon: { value: new THREE.Color(0x34405a) }, glow: { value: new THREE.Color(0xb07a5e) }
+      top: { value: new THREE.Color(0xc4ccc9) }, mid: { value: new THREE.Color(0xe3e5df) },
+      horizon: { value: new THREE.Color(0xf6f6f4) }, glow: { value: new THREE.Color(0x14100a) }
     },
     vertexShader: "varying vec3 vP; void main(){ vP = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }",
     fragmentShader: `uniform vec3 top; uniform vec3 mid; uniform vec3 horizon; uniform vec3 glow; varying vec3 vP;
@@ -52,45 +48,36 @@ function start() {
         c = mix(c, top, smoothstep(0.22, 0.85, h));
         float sunSide = smoothstep(-0.2, 1.0, dot(normalize(vP.xz + 1e-4), normalize(vec2(0.55, -1.0))));
         c += glow * pow(max(0.0, 1.0 - abs(h) * 5.0), 2.5) * sunSide * 0.55;
-        if (h < 0.0) c = mix(horizon * 0.45, vec3(0.02, 0.03, 0.045), smoothstep(0.0, -0.15, h));
+        if (h < 0.0) c = horizon;
         gl_FragColor = vec4(c, 1.0);
         #include <tonemapping_fragment>
         #include <colorspace_fragment>
       }`
   }));
   scene.add(sky);
-  // a few early stars
-  {
-    const n = 420, pos = new Float32Array(n * 3);
-    for (let i = 0; i < n; i++) {
-      const th = Math.random() * Math.PI * 2, ph = 0.18 + Math.random() * 1.2;
-      pos.set([Math.cos(th) * Math.cos(ph) * 420, Math.sin(ph) * 420, Math.sin(th) * Math.cos(ph) * 420], i * 3);
-    }
-    const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.BufferAttribute(pos, 3));
-    scene.add(new THREE.Points(g, new THREE.PointsMaterial({ color: 0xbcd0ff, size: 1.1, sizeAttenuation: false, fog: false, transparent: true, opacity: 0.55 })));
-  }
+
 
   // environment for reflections: render the sky plus a soft warm horizon card
   {
     const pmrem = new THREE.PMREMGenerator(renderer);
     const envScene = new THREE.Scene();
     envScene.add(sky.clone());
-    const card = new THREE.Mesh(new THREE.PlaneGeometry(260, 40), new THREE.MeshBasicMaterial({ color: 0x8a6650 }));
+    const card = new THREE.Mesh(new THREE.PlaneGeometry(260, 40), new THREE.MeshBasicMaterial({ color: 0xfff1d8 }));
     card.position.set(120, 10, -260); card.lookAt(0, 10, 0); envScene.add(card);
     scene.environment = pmrem.fromScene(envScene, 0.04).texture;
   }
 
   // ---------- lights ----------
-  scene.add(new THREE.HemisphereLight(0x6a84b4, 0x1a1d22, 0.95));
-  const moon = new THREE.DirectionalLight(0xb9ccff, 1.6);
+  scene.add(new THREE.HemisphereLight(0xf4f2ea, 0x6d6a58, 1.15));
+  const moon = new THREE.DirectionalLight(0xfff4e2, 2.6);   // the sun
   moon.position.set(-16, 26, 20); moon.target.position.set(-1, 3, 0);
   moon.castShadow = true;
   moon.shadow.mapSize.set(small ? 1024 : 2048, small ? 1024 : 2048);
   Object.assign(moon.shadow.camera, { left: -24, right: 24, top: 24, bottom: -24, near: 1, far: 90 });
   moon.shadow.bias = -0.0004; moon.shadow.normalBias = 0.025;
   scene.add(moon, moon.target);
-  const fill = new THREE.DirectionalLight(0x8fa6d6, 0.55); fill.position.set(10, 30, 30); scene.add(fill);
-  const rim = new THREE.DirectionalLight(0xffa36e, 0.55);
+  const fill = new THREE.DirectionalLight(0xeef0ea, 0.45); fill.position.set(10, 30, 30); scene.add(fill);
+  const rim = new THREE.DirectionalLight(0xffe2bf, 0.4);
   rim.position.set(24, 7, -26); scene.add(rim);
 
   // ---------- textures ----------
@@ -112,37 +99,35 @@ function start() {
     [m, n].forEach((t) => { t.repeat.set(rep[0], rep[1]); t.needsUpdate = true; });
     return { map: m, normalMap: n };
   };
-  const ground = new THREE.Mesh(new THREE.PlaneGeometry(320, 320), new THREE.MeshStandardMaterial({ color: 0xb8c0b0, roughness: 1, ...tiled(maps.grass, [107, 107]) }));
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(320, 320), new THREE.MeshStandardMaterial({ color: 0xdfe4cf, roughness: 1, ...tiled(maps.grass, [107, 107]) }));
   ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
   const paveMat = (w, d) => new THREE.MeshStandardMaterial({ color: 0x9a9a96, roughness: 0.9, ...tiled(maps.concrete, [w / 2, d / 2]) });
   const drive = new THREE.Mesh(new THREE.PlaneGeometry(4.4, 16), paveMat(4.4, 16));
   drive.rotation.x = -Math.PI / 2; drive.position.set(-8.6, 0.015, 12.6); drive.receiveShadow = true; scene.add(drive);
   const path = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 12), paveMat(1.5, 12));
   path.rotation.x = -Math.PI / 2; path.position.set(-4.6, 0.02, 10.6); path.receiveShadow = true; scene.add(path);
-  const street = new THREE.Mesh(new THREE.PlaneGeometry(320, 9), new THREE.MeshStandardMaterial({ color: 0x15181c, roughness: 0.55, metalness: 0.1 }));
+  const street = new THREE.Mesh(new THREE.PlaneGeometry(320, 9), new THREE.MeshStandardMaterial({ color: 0x4a4a44, roughness: 0.85, metalness: 0 }));
   street.rotation.x = -Math.PI / 2; street.position.set(0, 0.01, 25); street.receiveShadow = true; scene.add(street);
 
   // path bollards + the single electric-blue accent along the walk
   const bollardMat = new THREE.MeshStandardMaterial({ color: 0x1b1f25, metalness: 0.7, roughness: 0.4 });
-  const lensMat = new THREE.MeshStandardMaterial({ color: 0x000000, emissive: 0xcfe0ff, emissiveIntensity: 2.2 });
+  const lensMat = new THREE.MeshStandardMaterial({ color: 0xe8e6dc, roughness: 0.3 });
   [6.5, 10, 13.5].forEach((z) => {
     const b = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.65, 16), bollardMat);
     b.position.set(-5.65, 0.33, z); b.castShadow = true; scene.add(b);
     const l = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.075, 0.06, 16), lensMat);
     l.position.set(-5.65, 0.6, z); scene.add(l);
   });
-  const accent = new THREE.PointLight(0x2779d5, 5, 9, 2); accent.position.set(-4.8, 0.5, 9.5); scene.add(accent);
-  const walk = new THREE.PointLight(0xcfe0ff, 2.5, 7, 2); walk.position.set(-5.6, 0.8, 13); scene.add(walk);
-  // warm grazing uplights on the facade
+      // warm grazing uplights on the facade
   [[-1.6, 4.2], [3.1, 7.9]].forEach(([x, z]) => {
-    const s = new THREE.SpotLight(0xffbf86, 26, 11, 0.45, 0.7, 2);
+    const s = new THREE.SpotLight(0xffd9b0, 6, 11, 0.45, 0.7, 2);
     s.position.set(x, 0.2, z + 0.9); s.target.position.set(x, 6, z - 0.2);
     scene.add(s, s.target);
   });
 
   // trees, hedges, neighbours: enough context to read as a real street at dusk
-  const leaf = [0x2a3a2c, 0x324332, 0x243126].map((c) => new THREE.MeshStandardMaterial({ color: c, roughness: 0.95 }));
-  const bark = new THREE.MeshStandardMaterial({ color: 0x2b241f, roughness: 1 });
+  const leaf = [0x55663f, 0x627349, 0x4b5a38].map((c) => new THREE.MeshStandardMaterial({ color: c, roughness: 0.95 }));
+  const bark = new THREE.MeshStandardMaterial({ color: 0x5a4a3c, roughness: 1 });
   const crownGeo = new THREE.IcosahedronGeometry(1, 3);
   {
     const p = crownGeo.attributes.position;
@@ -170,8 +155,8 @@ function start() {
     const h = new THREE.Mesh(new THREE.BoxGeometry(w, 0.8, 0.8), hedgeMat);
     h.position.set(x, 0.4, z + 0.5); h.castShadow = h.receiveShadow = true; scene.add(h);
   });
-  const nbMat = new THREE.MeshStandardMaterial({ color: 0x1a1f27, roughness: 0.95 });
-  const nbWin = new THREE.MeshStandardMaterial({ color: 0x000000, emissive: 0xffb36b, emissiveIntensity: 0.9 });
+  const nbMat = new THREE.MeshStandardMaterial({ color: 0xd8d4c8, roughness: 0.95 });
+  const nbWin = new THREE.MeshStandardMaterial({ color: 0x3a3c3a, roughness: 0.2, metalness: 0.4 });
   [[-34, -6, 9], [-30, -30, 11], [32, -28, 10], [46, -10, 9], [-12, -42, 12], [16, -44, 10], [-44, 10, 9], [46, 16, 8]].forEach(([x, z, w], i) => {
     const g = new THREE.Group();
     const b = new THREE.Mesh(new THREE.BoxGeometry(w, 6, 8), nbMat); b.position.y = 3; g.add(b);
@@ -197,26 +182,19 @@ function start() {
   {
     const c = document.createElement("canvas"); c.width = c.height = 256;
     const g = c.getContext("2d"); const gr = g.createRadialGradient(128, 128, 10, 128, 128, 128);
-    gr.addColorStop(0, "#141b27"); gr.addColorStop(0.6, "#0d1219"); gr.addColorStop(1, "rgba(16,21,29,0)");
+    gr.addColorStop(0, "#ffffff"); gr.addColorStop(0.6, "#f6f6f4"); gr.addColorStop(1, "rgba(246,246,244,0)");
     g.fillStyle = gr; g.fillRect(0, 0, 256, 256);
     const bd = new THREE.Mesh(new THREE.PlaneGeometry(26, 26), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false, fog: false }));
     const dir = V(8.2, 4.2, 11.5).normalize();
     bd.position.copy(AP).addScaledVector(dir, -9); bd.position.y += 1; bd.lookAt(AP.clone().addScaledVector(dir, 20));
     scene.add(bd);
   }
-  const aKey = new THREE.SpotLight(0xe8f0ff, 260, 26, 0.55, 0.55, 2);
+  const aKey = new THREE.SpotLight(0xfff6ea, 160, 26, 0.6, 0.6, 2);
   aKey.position.set(AP.x + 4, AP.y + 9, AP.z + 7);
   const aFill = new THREE.PointLight(0xdfe6f2, 14, 14, 2); aFill.position.set(AP.x + 6, AP.y + 1.5, AP.z + 4); scene.add(aFill); aKey.target = A.root; scene.add(aKey);
-  const aRim = new THREE.PointLight(0x2779d5, 40, 12, 2); aRim.position.set(AP.x - 4, AP.y + 2, AP.z - 3); scene.add(aRim);
+  const aRim = new THREE.PointLight(0xfff347, 18, 12, 2); aRim.position.set(AP.x - 4, AP.y + 2, AP.z - 3); scene.add(aRim);
 
-  // ---------- post: subtle bloom on the warm windows and lenses ----------
-  let composer = null;
-  if (!small) {
-    composer = new EffectComposer(renderer);
-    composer.addPass(new RenderPass(scene, camera));
-    composer.addPass(new UnrealBloomPass(new THREE.Vector2(512, 512), 0.32, 0.55, 0.86));
-    composer.addPass(new OutputPass());
-  }
+
 
   // ---------- camera path ----------
   const P = {
@@ -386,7 +364,6 @@ function start() {
   function resize() {
     const w = innerWidth, h = innerHeight;
     renderer.setSize(w, h, false);
-    composer && composer.setSize(w, h);
     camera.aspect = w / h;
     const wide = w / h > 1.05 && w > 860;
     camera.setViewOffset(w, h, wide ? -w * 0.17 : 0, wide ? 0 : h * 0.2, w, h);
@@ -426,7 +403,7 @@ function start() {
     stepWipe(dt);
     placeHotspots();
     frame++;
-    composer ? composer.render() : renderer.render(scene, camera);
+    renderer.render(scene, camera);
     const moving = cam.p.distanceToSquared(d.pose.p) > 1e-5 || wipe || Math.abs(d.explodeTarget - explode) > 1e-3;
     settle = moving || !HR.paused ? 24 : settle - 1;
     if (visible && settle > 0) raf = requestAnimationFrame(tick);
