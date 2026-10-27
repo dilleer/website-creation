@@ -331,9 +331,12 @@ function start() {
       const v = wp.clone().project(camera);
       const sx = ((v.x + 1) / 2) * w;
       // near the right edge the label goes on the left of the pin so it isn't cut off
-      const flip = sx > w * 0.62;
-      if (flip !== hs.flip) { hs.flip = flip; hs.el.classList.toggle("is-flipped", flip); hs.w = 0; }
-      if (flip && !hs.w) hs.w = hs.el.offsetWidth;
+      if (!hs.w) hs.w = hs.el.offsetWidth;
+      const fitsRight = sx + hs.w <= w - 8, fitsLeft = sx - hs.w + 24 >= 8;
+      const flip = !fitsRight && fitsLeft;
+      if (flip !== hs.flip) { hs.flip = flip; hs.el.classList.toggle("is-flipped", flip); }
+      // no room either side (narrow phones): show the pin only, the panel already names the part
+      hs.el.classList.toggle("is-cramped", !fitsRight && !fitsLeft);
       hs.el.style.transform = `translate(${flip ? sx - hs.w + 24 : sx}px, ${((1 - v.y) / 2) * h}px)`;
       if (frame % 8 === 0) {
         const dir = wp.clone().sub(camera.position); const dist = dir.length();

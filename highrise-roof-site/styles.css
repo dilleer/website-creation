@@ -87,6 +87,7 @@ button { font: inherit; color: inherit; }
 .header-phone { text-decoration: none; display: inline-flex; align-items: center; min-height: 44px; color: #3d3d35; }
 .header-phone:hover { color: var(--ivory); }
 @media (max-width: 1080px) { .site-nav { display: none; } .header-actions { margin-left: auto; } }
+@media (max-width: 359px) { .header-row { gap: .75rem; } .header-actions .btn { padding-inline: .75rem; font-size: .8rem; } }
 @media (max-width: 560px) { .header-phone { display: none; } }
 
 /* ---------- fixed 3D stage ---------- */
@@ -111,6 +112,7 @@ html.no-webgl .stage { background: var(--midnight) url("images/hf-residential.we
 .hotspot .lead { width: 28px; height: 1px; background: rgba(44, 44, 38, .55); transform: translateY(-11px); }
 .hotspot .tag { transform: translateY(-11px); font: 400 .72rem/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; background: rgba(255, 255, 255, .92); border: 1px solid rgba(44, 44, 38, .18); padding: .3rem .45rem; border-radius: 4px; }
 .hotspot.is-flipped { flex-direction: row-reverse; }
+.hotspot.is-cramped .tag, .hotspot.is-cramped .lead { visibility: hidden; }
 .hotspot.is-active .ring { border: 2px solid var(--accent); background: var(--blue); outline: 1.5px solid var(--blue); }
 .hotspot.is-active .ring::after { background: var(--accent); }
 .hotspot.is-active .tag { border-color: var(--blue); }
@@ -213,8 +215,13 @@ main > :not(.scene) { pointer-events: auto; }
   .hotspot .ring::before { content: ""; position: absolute; inset: -11px; border-radius: 50%; }
   .panel-hero { top: calc(var(--header-h) + 38svh); }
   .scroll-cue { display: none; }
-  .chip-list { flex-wrap: nowrap; overflow-x: auto; padding-bottom: .25rem; }
-  .chip { flex: none; white-space: nowrap; }
+  /* roof parts wrap inside the sheet instead of scrolling past its edge */
+  .chip-list { flex-wrap: wrap; gap: .35rem; }
+  .chip { min-height: 36px; padding: .25rem .6rem; font-size: .8rem; gap: .35rem; }
+  .chip-num { display: none; }
+  .scene-explore .panel:not(.panel-hero) { max-height: 56svh; }
+  .scene-explore .panel .view-controls { order: 4; }
+  .panel { overflow-wrap: anywhere; }
   .motion-toggle { top: calc(var(--header-h) + .75rem); bottom: auto; }
 }
 /* Short or zoomed viewports: let panels flow so nothing is clipped */
@@ -351,3 +358,4 @@ fieldset[aria-invalid="true"] .choice span { border-color: var(--error); }
   .cookie-banner { flex-direction: column; align-items: stretch; gap: 1rem; padding: 1rem; left: .5rem; right: .5rem; bottom: calc(.5rem + env(safe-area-inset-bottom, 0px)); max-height: 70svh; overflow: auto; }
   .cookie-actions .btn { flex: 1; }
 }
+@media (max-width: 359px) { .mobile-bar .btn { padding-inline: .5rem; font-size: .85rem; white-space: nowrap; } }
