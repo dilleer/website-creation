@@ -332,3 +332,17 @@ fieldset[aria-invalid="true"] .choice span { border-color: var(--error); }
 }
 
 .preview-toast { position: fixed; left: 50%; bottom: calc(6rem + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 60; max-width: min(92vw, 26rem); padding: .85rem 1rem; border-radius: var(--r); background: var(--graphite); border: 1px solid var(--line-strong); color: var(--ivory); }
+
+/* cookie consent: a non-modal bar, so the page stays usable until someone chooses */
+.cookie-banner { position: fixed; left: 1rem; right: 1rem; bottom: calc(1rem + env(safe-area-inset-bottom, 0px)); z-index: 70; max-width: 46rem; margin: 0 auto; display: flex; gap: 1.5rem; align-items: center; padding: 1.5rem; background: var(--paper); color: var(--ivory); border: 1px solid var(--line-strong); border-top: 3px solid var(--accent); border-radius: var(--r-lg); }
+.cookie-banner[hidden] { display: none; }
+.cookie-title { font-family: var(--display); font-weight: 400; font-size: 1.5rem; line-height: 1.1; letter-spacing: -0.05em; margin: 0 0 .5rem; }
+.cookie-text p { margin: 0; font-size: .875rem; }
+.cookie-actions { display: flex; gap: .5rem; flex: none; }
+.cookie-actions .btn { min-height: 44px; }
+.footer-base { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: space-between; align-items: center; }
+.link-btn { background: none; border: 0; padding: .75rem 0; min-height: 44px; color: var(--ivory); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+@media (max-width: 760px) {
+  .cookie-banner { flex-direction: column; align-items: stretch; gap: 1rem; padding: 1rem; left: .5rem; right: .5rem; bottom: calc(.5rem + env(safe-area-inset-bottom, 0px)); max-height: 70svh; overflow: auto; }
+  .cookie-actions .btn { flex: 1; }
+}

@@ -232,5 +232,39 @@
   });
   go(0, true);
 
+
+  // Cookie consent. The choice is kept for a year; scripts that need consent wait for HR.consent === "accepted"
+  // or listen for hr:consent. Nothing on the site sets non-essential cookies yet.
+  var CONSENT_KEY = "hr-cookie-consent";
+  var banner = $("#cookie-banner");
+  function readConsent() {
+    try {
+      var v = JSON.parse(localStorage.getItem(CONSENT_KEY));
+      if (v && Date.now() - v.at < 365 * 864e5) return v.value;
+    } catch (e) {}
+    return null;
+  }
+  function setConsent(value) {
+    window.HR.consent = value;
+    try { localStorage.setItem(CONSENT_KEY, JSON.stringify({ value: value, at: Date.now() })); } catch (e) {}
+    emit("hr:consent", { value: value });
+  }
+  var opener = null;
+  function showBanner() { opener = document.activeElement; banner.hidden = false; banner.querySelector("[data-consent=accepted]").focus(); }
+  if (banner) {
+    window.HR.consent = readConsent();
+    $$("[data-consent]", banner).forEach(function (b) {
+      b.addEventListener("click", function () {
+        setConsent(b.dataset.consent);
+        banner.hidden = true;
+        if (opener && opener.id === "cookie-settings") opener.focus();
+        opener = null;
+      });
+    });
+    var settings = $("#cookie-settings");
+    if (settings) settings.addEventListener("click", showBanner);
+    if (!window.HR.consent) banner.hidden = false;
+  }
+
   var y = $("#year"); if (y) y.textContent = new Date().getFullYear();
 })();
