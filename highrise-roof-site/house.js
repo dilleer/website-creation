@@ -8,6 +8,7 @@ export function buildHouse(maps) {
   const house = new THREE.Group();
   const roofSurfaces = [];          // meshes whose material changes with the finish picker
   const hot = {};                   // world-space anchor points for hotspots
+  const hotFace = {};               // horizontal direction each part faces, so the camera can turn to it
   const occluders = [];
 
   const M = {
@@ -65,6 +66,7 @@ export function buildHouse(maps) {
   hot.valley = new THREE.Vector3(0.3, 7.95, 2.2);
   hot.gutter = a.eaveFront.clone().add(new THREE.Vector3(-4.2, 0, 0));
   hot.dripEdge = c.eaveFront.clone().add(new THREE.Vector3(0, 0.12, 2.2));
+  Object.assign(hotFace, { ridge: [0, 1], shingles: [0, 1], valley: [-0.7, 1], gutter: [0, 1], dripEdge: [-1, 0.8], skylight: [0, 1], downspout: [1, 1] });
 
   // ---------- Chimney with step flashing and cap ----------
   const chX = -3.6, chZ = -1.6;
@@ -74,7 +76,8 @@ export function buildHouse(maps) {
   // counter-flashing band where it meets the roof (roof height at z=-1.6 is ~8.96)
   const flashY = 6.4 + 3.2 * (1 - Math.abs(chZ) / 4) + 0.1;
   box(1.3, 0.35, 1.3, M.flashing, chX, flashY, chZ);
-  hot.chimney = new THREE.Vector3(chX + 0.65, flashY + 0.2, chZ + 0.6);
+  hot.chimney = new THREE.Vector3(chX, flashY + 0.1, chZ - 0.7);
+  hotFace.chimney = [-0.45, -1]; // back slope: the camera swings round behind the house
 
   // ---------- Skylight on the front slope of A ----------
   const sky = new THREE.Group();
@@ -152,7 +155,7 @@ export function buildHouse(maps) {
     l.position.set(x, y, z); house.add(l); lights.push(l);
   });
 
-  return { house, roofMat, roofSurfaces, hot, occluders, materials: M };
+  return { house, roofMat, roofSurfaces, hot, hotFace, occluders, materials: M };
 }
 
 function pick(set) {

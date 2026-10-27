@@ -219,6 +219,7 @@ function start() {
   }
 
   const view = { az: 0, el: 0, zoom: 0, assemblyYaw: 0 };
+  let fit = 1; // >1 steps the camera back when the space beside the panels is narrow
   const cam = { p: P.e0.p.clone(), t: P.e0.t.clone() };
   const pointer = new THREE.Vector2();
   let explode = 0, state = { i: 0, p: 0 }, idle = 0;
@@ -236,6 +237,21 @@ function start() {
       const shift = f.clone().sub(pose.t).multiplyScalar(0.5);
       pose.t.add(shift); pose.p.add(shift);
       pose.p.lerp(pose.t, 0.18);
+      // turn the orbit once toward the side the part faces, so every pick shows its part
+      if (view.faceFor !== HR.hotspot && H.hotFace[HR.hotspot]) {
+        const [nx, nz] = H.hotFace[HR.hotspot];
+        const o = pose.p.clone().sub(pose.t);
+        let a = Math.atan2(nx, nz) - Math.atan2(o.x, o.z);
+        a = Math.atan2(Math.sin(a), Math.cos(a));
+        view.azTarget = view.az + Math.atan2(Math.sin(a - view.az), Math.cos(a - view.az));
+        view.faceFor = HR.hotspot;
+      }
+    }
+    if (!HR.hotspot) view.faceFor = null;
+    if (view.azTarget != null) {
+      const k = HR.paused ? 1 : 0.07;
+      view.az += (view.azTarget - view.az) * k;
+      if (Math.abs(view.azTarget - view.az) < 0.002) view.azTarget = null;
     }
     // user orbit / zoom (explore + finish), drift toward rest elsewhere
     const userScene = i === 1 || i === 3;
@@ -247,6 +263,7 @@ function start() {
     off.applyAxisAngle(right, view.el);
     off.multiplyScalar(Math.pow(0.86, view.zoom));
     if (camera.aspect < 0.9) off.multiplyScalar(1.5); // portrait screens see less width: step back
+    if (state.i > 0) off.multiplyScalar(fit);
     if (off.y + pose.t.y < 1.2) off.y = 1.2 - pose.t.y;
     pose.p = pose.t.clone().add(off);
     if (finePointer && !HR.paused) { pose.p.x += pointer.x * 0.5; pose.p.y += pointer.y * 0.3; }
@@ -275,6 +292,7 @@ function start() {
     const dx = e.clientX - prev.x, dy = e.clientY - prev.y;
     pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
     if (state.i === 1 || state.i === 3) {
+      view.azTarget = null;
       view.az -= dx * 0.006;
       if (e.pointerType === "mouse") view.el = THREE.MathUtils.clamp(view.el + dy * 0.004, -0.35, 0.5);
     } else if (state.i === 2) view.assemblyYaw += dx * 0.008;
@@ -282,9 +300,9 @@ function start() {
   });
   const up = (e) => { pointers.delete(e.pointerId); if (!pointers.size) pinch = 0; };
   canvas.addEventListener("pointerup", up); canvas.addEventListener("pointercancel", up); canvas.addEventListener("pointerleave", up);
-  document.addEventListener("hr:orbit", (e) => { if (state.i === 2) view.assemblyYaw += e.detail.d * 0.5; else view.az += e.detail.d * 0.4; kick(); });
+  document.addEventListener("hr:orbit", (e) => { if (state.i === 2) view.assemblyYaw += e.detail.d * 0.5; else { view.azTarget = null; view.az += e.detail.d * 0.4; } kick(); });
   document.addEventListener("hr:zoom", (e) => { view.zoom = THREE.MathUtils.clamp(view.zoom + e.detail.d, -2, 5); kick(); });
-  document.addEventListener("hr:reset", () => { view.az = view.el = view.zoom = 0; kick(); });
+  document.addEventListener("hr:reset", () => { view.az = view.el = view.zoom = 0; view.azTarget = null; kick(); });
   document.addEventListener("hr:layer", () => { A.isolate(HR.layer); kick(); });
   document.addEventListener("hr:motion", kick);
   document.addEventListener("hr:hotspot", () => { syncHotspots(); kick(); });
@@ -300,7 +318,7 @@ function start() {
     hsLayer.appendChild(b);
     return { el: b, id: h.id, hidden: false };
   });
-  function syncHotspots() { hsEls.forEach((h) => h.el.classList.toggle("is-active", h.id === HR.hotspot)); }
+  function syncHotspots() { hsEls.forEach((h) => { h.el.classList.toggle("is-active", h.id === HR.hotspot); h.w = 0; }); }
   const ray = new THREE.Raycaster();
   let frame = 0;
   function placeHotspots() {
@@ -311,7 +329,12 @@ function start() {
     hsEls.forEach((hs) => {
       const wp = H.hot[hs.id];
       const v = wp.clone().project(camera);
-      hs.el.style.transform = `translate(${((v.x + 1) / 2) * w}px, ${((1 - v.y) / 2) * h}px)`;
+      const sx = ((v.x + 1) / 2) * w;
+      // near the right edge the label goes on the left of the pin so it isn't cut off
+      const flip = sx > w * 0.62;
+      if (flip !== hs.flip) { hs.flip = flip; hs.el.classList.toggle("is-flipped", flip); hs.w = 0; }
+      if (flip && !hs.w) hs.w = hs.el.offsetWidth;
+      hs.el.style.transform = `translate(${flip ? sx - hs.w + 24 : sx}px, ${((1 - v.y) / 2) * h}px)`;
       if (frame % 8 === 0) {
         const dir = wp.clone().sub(camera.position); const dist = dir.length();
         ray.set(camera.position, dir.normalize()); ray.far = dist - 0.3;
@@ -327,7 +350,8 @@ function start() {
     const s = typeSet[f.type];
     mat.map = s.map; mat.normalMap = s.normalMap; mat.roughnessMap = s.roughnessMap || null;
     [s.map, s.normalMap, s.roughnessMap].forEach((t) => t && t.repeat.setScalar(1.9 / s.worldSize));
-    mat.color.set(f.color).multiplyScalar(f.metal > 0.5 ? 1.15 : 1.7); // lifted so dark finishes still read at dusk mat.roughness = f.rough; mat.metalness = f.metal;
+    mat.color.set(f.color).multiplyScalar(f.metal > 0.5 ? 1.15 : 1.7); // lifted so dark finishes still read
+    mat.roughness = f.rough; mat.metalness = f.metal;
     mat.normalScale.setScalar(f.type === "seam" ? 0.9 : 1.2);
     mat.envMapIntensity = f.metal > 0.5 ? 1.0 : 0.6;
     mat.needsUpdate = true;
@@ -366,7 +390,11 @@ function start() {
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     const wide = w / h > 1.05 && w > 860;
-    camera.setViewOffset(w, h, wide ? -w * 0.17 : 0, wide ? 0 : h * 0.2, w, h);
+    // centre the 3D in the space right of the side panels, and step back when that space is narrow
+    const panel = document.querySelector(".scene-explore .panel");
+    const right = wide && panel ? Math.min(panel.getBoundingClientRect().right, w * 0.5) : 0;
+    fit = wide ? Math.max(1, (w * 0.58) / (w - right)) : 1;
+    camera.setViewOffset(w, h, wide ? -Math.max(w * 0.17, right / 2) : 0, wide ? 0 : h * 0.2, w, h);
     camera.fov = wide ? 34 : 44;
     camera.updateProjectionMatrix();
     kick();
@@ -404,7 +432,7 @@ function start() {
     placeHotspots();
     frame++;
     renderer.render(scene, camera);
-    const moving = cam.p.distanceToSquared(d.pose.p) > 1e-5 || wipe || Math.abs(d.explodeTarget - explode) > 1e-3;
+    const moving = cam.p.distanceToSquared(d.pose.p) > 1e-5 || view.azTarget != null || wipe || Math.abs(d.explodeTarget - explode) > 1e-3;
     settle = moving || !HR.paused ? 24 : settle - 1;
     if (visible && settle > 0) raf = requestAnimationFrame(tick);
   }
